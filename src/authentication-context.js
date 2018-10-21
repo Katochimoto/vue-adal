@@ -110,7 +110,8 @@ class AuthenticationContext {
           }
         } else if (
           opts.config.localAuthUrl &&
-          to.matched.some(record => record.meta.requireNoauth)
+          to.matched.some(record => record.meta.requireNoauth) &&
+          this.isAuthenticated()
         ) {
           next(opts.config.localAuthUrl)
         } else {
