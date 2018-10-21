@@ -78,7 +78,10 @@ class AuthenticationContext {
     if (opts.router) {
       // Initialize the router hooks
       opts.router.beforeEach((to, from, next) => {
-        if (opts.globalAuth || to.matched.some(record => record.meta.requireAuth)) {
+        if (
+          opts.globalAuth ||
+          to.matched.some(record => record.meta.requireAuth)
+        ) {
           if (this.isAuthenticated()) {
             // Authenticated, make sure roles are okay
             let checkRoles = []
@@ -105,6 +108,11 @@ class AuthenticationContext {
           } else {
             this.login()
           }
+        } else if (
+          opts.config.localAuthUrl &&
+          to.matched.some(record => record.meta.requireNoauth)
+        ) {
+          next(opts.config.localAuthUrl)
         } else {
           next()
         }
