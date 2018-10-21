@@ -138,6 +138,10 @@ class AuthenticationContext {
     this.adalContext.logOut()
   }
 
+  loginInProgress () {
+    return this.adalContext.loginInProgress()
+  }
+
   /**
    * @callback tokenCallback
    * @param {string} error_description error description returned from AAD if token request fails.
