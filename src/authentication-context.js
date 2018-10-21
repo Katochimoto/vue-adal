@@ -100,6 +100,8 @@ class AuthenticationContext {
             } else {
               next()
             }
+          } else if (opts.config.localLoginUrl) {
+            next(opts.config.localLoginUrl)
           } else {
             this.login()
           }
