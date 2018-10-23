@@ -37,11 +37,14 @@ export class AxiosAuthHttp {
       throw new Error('options.resourceId is required to acquire an auth token')
     }
 
+    const token = AuthenticationContext.getCachedToken()
+    const authorization = token ? `BEARER ${token}` : null
+
     let axios = options.axios
     let http = axios.create({
       baseURL: options.baseUrl,
       headers: {
-        Authorization: null
+        Authorization: authorization
       }
     })
 

@@ -188,6 +188,14 @@ class AuthenticationContext {
     return authenticated && this.user
   }
 
+  getCachedToken () {
+    const authenticated = this.adalContext.getCachedToken(this.config.clientId)
+    if (authenticated && !this.user) {
+      this.user = this.adalContext.getCachedUser()
+    }
+    return this.user && authenticated
+  }
+
   checkRoles (roles) {
     if (!this.isAuthenticated()) {
       return false
