@@ -188,11 +188,14 @@ class AuthenticationContext {
     return authenticated && this.user
   }
 
-  getCachedToken () {
-    const authenticated = this.adalContext.getCachedToken(this.config.clientId)
+  getCachedToken (endpoint) {
+    const id = endpoint && this.config.endpoints && this.config.endpoints[endpoint] || this.config.clientId
+    const authenticated = this.adalContext.getCachedToken(id)
+
     if (authenticated && !this.user) {
       this.user = this.adalContext.getCachedUser()
     }
+
     return this.user && authenticated
   }
 
