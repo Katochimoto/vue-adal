@@ -44,7 +44,8 @@ export class AxiosAuthHttp {
     let http = axios.create({
       baseURL: options.baseUrl,
       headers: {
-        Authorization: authorization
+        Authorization: authorization,
+        'X-Retry': 1,
       }
     })
 
@@ -52,6 +53,11 @@ export class AxiosAuthHttp {
       return response
     }, (error) => {
       if (error.response.status === 401) {
+        const retry = error.request.config.headers['X-Retry']
+        if (retry > 1) {
+          return Promise.reject(error)
+        }
+
         AuthenticationContext.adalContext.clearCacheForResource(options.resourceId)
         return new Promise((resolve, reject) => getToken(options.resourceId, http, () => {
           let config = error.response.config
@@ -63,7 +69,8 @@ export class AxiosAuthHttp {
             headers: {
               'Accept': config.headers['Accept'],
               'Authorization': config.headers['Authorization'],
-              'Content-Type': config.headers['Content-Type']
+              'Content-Type': config.headers['Content-Type'],
+              'X-Retry': retry + 1,
             }
           }).then(res => resolve(res), err => reject(err))
         }))
@@ -78,20 +85,43 @@ export class AxiosAuthHttp {
 
     // Set up the router hooks for this resource
     options.router.beforeEach((to, from, next) => {
-      getToken(options.resourceId, http, (err, token) => {
-        if (err) {
-          if (options.onTokenFailure instanceof Function) {
-            options.onTokenFailure(err)
+      if (
+        to.matched.some(record => record.meta.requireAuth)
+      ) {
+        getToken(options.resourceId, http, (err, token) => {
+          if (err) {
+            if (options.onTokenFailure instanceof Function) {
+              options.onTokenFailure(err)
+            }
+
+            let login = AuthenticationContext.config.localLoginUrl
+
+            if (login) {
+              login = typeof login === 'object' ? login : {
+                path: login,
+              }
+
+              login.query = login.query || {}
+              login.query.redirect = to.fullPath
+
+              next(login)
+            } else {
+              next()
+            }
+          } else {
+            if (options.onTokenSuccess instanceof Function) {
+              options.onTokenSuccess(http, AuthenticationContext, token)
+            }
+
+            next()
           }
-          next()
-          return
-        }
-        if (options.onTokenSuccess instanceof Function) {
-          options.onTokenSuccess(http, AuthenticationContext, token)
-        }
+        })
+
+      } else {
         next()
-      })
+      }
     })
+
     return http
   }
 }
