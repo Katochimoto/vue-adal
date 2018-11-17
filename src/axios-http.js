@@ -40,13 +40,14 @@ export class AxiosAuthHttp {
     const token = AuthenticationContext.getCachedToken(options.baseUrl)
     const authorization = token ? `BEARER ${token}` : null
 
-    let axios = options.axios
-    let http = axios.create({
+    const axios = options.axios
+    const http = axios.create({
       baseURL: options.baseUrl,
       headers: {
         Authorization: authorization,
         'X-Retry': 1,
-      }
+      },
+      adapter: options.adapter || axios.defaults.adapter,
     })
 
     http.interceptors.response.use((response) => {
