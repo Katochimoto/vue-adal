@@ -8,20 +8,20 @@ const AdalPlugin = {
     authenticationContext = new AuthenticationContext(opts)
     vue.prototype.$adal = authenticationContext
 
-    vue.mixin({
-      data () {
-        return {
-          authenticated: false
-        }
-      },
+    // vue.mixin({
+    //   data () {
+    //     return {
+    //       authenticated: false
+    //     }
+    //   },
 
-      computed: {
-        isAuthenticated () {
-          this.authenticated = this.$adal.isAuthenticated()
-          return this.authenticated
-        }
-      }
-    })
+    //   computed: {
+    //     isAuthenticated () {
+    //       this.authenticated = this.$adal.isAuthenticated()
+    //       return this.authenticated
+    //     }
+    //   }
+    // })
   }
 }
 
